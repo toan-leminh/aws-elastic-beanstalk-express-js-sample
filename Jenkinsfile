@@ -55,9 +55,9 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        npm install -g snyk
+                        npm install --no-save snyk
                         echo "Running Snyk dependency vulnerability scan..."
-                        snyk test --severity-threshold=high --json-file-output=snyk-report.json
+                        npx snyk test --severity-threshold=high --json-file-output=snyk-report.json
                     '''
                 }
             }
