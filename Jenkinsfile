@@ -57,8 +57,15 @@ pipeline {
                     sh '''
                         npm install -g snyk
                         echo "Running Snyk dependency vulnerability scan..."
-                        snyk test --severity-threshold=high
+                        snyk test --severity-threshold=high --json-file-output=snyk-report.json
                     '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'snyk-report.json',
+                                     fingerprint: true,
+                                     allowEmptyArchive: true
                 }
             }
         }
@@ -67,6 +74,7 @@ pipeline {
             agent any
             steps {
                 sh '''
+                    echo "Building Docker image ${IMAGE_NAME}:${IMAGE_TAG}"
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} \
                         -t ${IMAGE_NAME}:latest \
                         .
@@ -85,6 +93,7 @@ pipeline {
                     )
                 ]) {
                     sh '''
+                        echo "Pushing Docker Image ${IMAGE_NAME}:${IMAGE_TAG} to Docker Hub"
                         echo "$DOCKER_PASSWORD" | \
                         docker login \
                         -u "$DOCKER_USERNAME" \
